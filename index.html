@@ -363,7 +363,7 @@
     </div>
     <div class="intro-container">
         <div class="intro-pokemon intro-player">
-            <img src="Edward.jpg" alt="Edward">
+            <img src=".jpg" alt="">
         </div>
         <div class="vs-text">VS</div>
         <div class="intro-pokemon intro-enemy">
@@ -372,7 +372,7 @@
     </div>
 
     <div class="battle-container">
-        <div class="pokemon-name player-name">Edward</div>
+        <div class="pokemon-name player-name"></div>
         <div class="pokemon-name enemy-name" id="enemy-name">Desi</div>
 
         <svg class="pokeball-svg player-ball" viewBox="0 0 100 100">
@@ -388,7 +388,7 @@
         </svg>
 
         <div class="pokemon player">
-            <img src="Edward.jpg" alt="Edward">
+            <img src="https://omniscye.github.io/CEO-Battle/.jpg" alt="Edward">
         </div>
         <div class="pokemon enemy">
             <img src="Desi.png" alt="Current Enemy">
@@ -556,12 +556,12 @@
                     break;
                 case 'ceo':
                     state.enemy.attackPower = Math.max(5, state.enemy.attackPower - 5);
-                    message = 'Edward used CEO Ability!';
+                    message = ' used CEO Ability!';
                     break;
                 case 'king':
                     damage = 40;
                     state.player.health -= 5;
-                    message = 'Edward used For The King!';
+                    message = ' used For The King!';
                     break;
             }
             showMessage(message);
