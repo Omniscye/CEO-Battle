@@ -1,0 +1,643 @@
+<html><head><base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        /* Add new intro styles */
+        .intro-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .intro-pokemon {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            opacity: 0;
+            transition: all 1s ease;
+        }
+
+        .intro-pokemon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid gold;
+        }
+
+        .intro-player {
+            bottom: -100%;
+            left: 10vw;
+        }
+
+        .intro-enemy {
+            top: -100%;
+            right: 10vw;
+        }
+
+        .vs-text {
+            font-size: 48px;
+            color: #fff;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s ease;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .intro-active .intro-player {
+            bottom: 25vh;
+            opacity: 1;
+        }
+
+        .intro-active .intro-enemy {
+            top: 25vh;
+            opacity: 1;
+        }
+
+        .intro-active .vs-text {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-10px, 10px); }
+            40% { transform: translate(10px, -10px); }
+            60% { transform: translate(-5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
+        }
+
+        .glitch {
+            animation: glitch 0.3s linear;
+        }
+
+        /* Add new start screen styles */
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .start-text {
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+        }
+
+        .game-over-text {
+            color: red;
+            font-size: 48px;
+            text-align: center;
+            animation: fadeIn 2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .win-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+        }
+
+        .win-text {
+            color: #4CAF50;
+            font-size: 48px;
+            text-align: center;
+            animation: winFadeIn 2s;
+        }
+
+        @keyframes winFadeIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Original styles continue below */
+        .battle-container {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            margin: 0;
+            position: relative;
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .pokemon {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            transition: all 0.5s ease;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .pokemon.appear {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .pokeball {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+
+        .player {
+            bottom: 40vh;
+            left: 5vw;
+        }
+
+        .enemy {
+            top: 20vh;
+            right: 5vw;
+        }
+
+        .pokemon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid gold;
+        }
+
+        .health-bar {
+            width: 40vw;
+            height: 15px;
+            background: #e74c3c;
+            position: absolute;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .health-bar.show {
+            opacity: 1;
+        }
+
+        .health-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: #2ecc71;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .player-health {
+            bottom: 55vh;
+            left: 5vw;
+        }
+
+        .enemy-health {
+            top: 18vh;
+            right: 5vw;
+        }
+
+        .player-name {
+            bottom: 57vh;
+            left: 25vw; 
+            transform: translateX(-50%);
+        }
+
+        .enemy-name {
+            top: 12vh; 
+            right: 25vw; 
+            transform: translateX(50%);
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 5vh;
+            left: 15vw;  
+            display: flex;
+            width: 70vw;  
+            flex-direction: column;
+            gap: 1vh;     
+            opacity: 1;  
+            transition: opacity 0.5s ease;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .attack-btn {
+            min-height: 40px;  
+            margin-bottom: 8px;  
+            font-size: 14px;    
+            padding: 8px;       
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white; 
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            opacity: 1;  
+        }
+
+        .attack-btn:hover {
+            background: rgba(0, 0, 0, 0.85);  
+            transform: scale(1.05);  
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .attack-btn:active {
+            transform: scale(0.95);
+        }
+
+        .message {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            width: 60%;
+            font-size: 16px;
+        }
+
+        .pokemon-name {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes pokeball-throw {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.5) rotate(180deg); }
+            100% { transform: scale(0) rotate(360deg); }
+        }
+
+        .pokeball-throw {
+            animation: pokeball-throw 1s ease forwards;
+        }
+
+        .pokeball-svg {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+        }
+
+        .player-ball {
+            bottom: 25vh;
+            left: 10vw;
+        }
+
+        .enemy-ball {
+            top: 25vh;
+            right: 10vw;
+        }
+    </style>
+</head>
+<body>
+    <div class="start-screen">
+        <div class="start-text">Tap to Start</div>
+    </div>
+    <div class="intro-container">
+        <div class="intro-pokemon intro-player">
+            <img src="Edward.jpg" alt="Edward">
+        </div>
+        <div class="vs-text">VS</div>
+        <div class="intro-pokemon intro-enemy">
+            <img src="Desi.png" alt="Desi">
+        </div>
+    </div>
+
+    <div class="battle-container">
+        <div class="pokemon-name player-name">Edward</div>
+        <div class="pokemon-name enemy-name" id="enemy-name">Desi</div>
+
+        <svg class="pokeball-svg player-ball" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#ff0000" stroke="#333" stroke-width="5"/>
+            <rect x="0" y="45" width="100" height="10" fill="#333"/>
+            <circle cx="50" cy="50" r="15" fill="white" stroke="#333" stroke-width="5"/>
+        </svg>
+        
+        <svg class="pokeball-svg enemy-ball" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#ff0000" stroke="#333" stroke-width="5"/>
+            <rect x="0" y="45" width="100" height="10" fill="#333"/>
+            <circle cx="50" cy="50" r="15" fill="white" stroke="#333" stroke-width="5"/>
+        </svg>
+
+        <div class="pokemon player">
+            <img src="Edward.jpg" alt="Edward">
+        </div>
+        <div class="pokemon enemy">
+            <img src="Desi.png" alt="Current Enemy">
+        </div>
+        
+        <div class="health-bar player-health">
+            <div class="health-bar-fill" id="player-health-fill"></div>
+        </div>
+        <div class="health-bar enemy-health">
+            <div class="health-bar-fill" id="enemy-health-fill"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="attack-btn" onclick="attack(&apos;discord&apos;)">Discord Confusion</button>
+            <button class="attack-btn" onclick="attack(&apos;ceo&apos;)">CEO Ability</button>
+            <button class="attack-btn" onclick="attack(&apos;king&apos;)">For The King</button>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <audio id="pokeball-sound" src="Click.mp3"></audio>
+        <audio id="attack-sound" src="Hit.mp3"></audio>
+        <audio id="damage-sound" src="Click.mp3"></audio>
+        <audio id="background-music" src="Background.mp3" loop></audio>
+    </div>
+    <div class="game-over-screen">
+        <div class="game-over-text">GAME OVER</div>
+    </div>
+    <div class="win-screen">
+        <div class="win-text">COMPLETE!</div>
+    </div>
+
+    <script>
+        const state = {
+            player: {
+                health: 100,
+                attackPower: 20
+            },
+            enemy: {
+                health: 100,
+                attackPower: 15,
+                current: 0
+            },
+            enemies: [{
+                name: 'Desi',
+                img: 'Desi.png'
+            }, {
+                name: 'Chris',
+                img: 'Chris.png'
+            }, {
+                name: 'Soze',
+                img: 'Soze.png'
+            }]
+        };
+        document.body.addEventListener('click', function () {
+            const bgMusic = document.getElementById('background-music');
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(error => console.log("Audio play failed:", error));
+        }, {
+            once: true
+        });
+        document.body.addEventListener('touchstart', function () {
+            const bgMusic = document.getElementById('background-music');
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(error => console.log("Audio play failed:", error));
+        }, {
+            once: true
+        });
+        function playSound(id) {
+            try {
+                const sound = document.getElementById(id);
+                if (sound && sound.play) {
+                    sound.currentTime = 0;
+                    sound.play().catch(error => console.log("Audio play failed:", error));
+                    setTimeout(() => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }, 1000);
+                }
+            } catch (error) {
+                console.log("Error playing sound:", error);
+            }
+        }
+        function startIntro() {
+            const intro = document.querySelector('.intro-container');
+            setTimeout(() => {
+                intro.classList.add('intro-active');
+                setTimeout(() => {
+                    intro.classList.add('glitch');
+                    setTimeout(() => {
+                        intro.style.display = 'none';
+                        startBattle();
+                    }, 300);
+                }, 3000);
+            }, 100);
+        }
+        function startBattle() {
+            setTimeout(() => {
+                document.querySelector('.player-ball').classList.add('pokeball-throw');
+                playSound('pokeball-sound');
+                setTimeout(() => {
+                    document.querySelector('.pokemon.player').classList.add('appear');
+                    document.querySelector('.enemy-ball').classList.add('pokeball-throw');
+                    playSound('pokeball-sound');
+                    setTimeout(() => {
+                        document.querySelector('.pokemon.enemy').classList.add('appear');
+                        document.querySelectorAll('.health-bar').forEach(bar => bar.classList.add('show'));
+                        document.querySelector('.controls').classList.add('show');
+                    }, 1000);
+                }, 1000);
+            }, 500);
+        }
+        function updateHealth() {
+            document.getElementById('player-health-fill').style.width = state.player.health + '%';
+            document.getElementById('enemy-health-fill').style.width = state.enemy.health + '%';
+        }
+        function showMessage(text) {
+            const message = document.getElementById('message');
+            message.style.display = 'block';
+            message.textContent = text;
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 2000);
+        }
+        function enemyAttack() {
+            if (state.enemy.health <= 0) return;
+            const enemyName = state.enemies[state.enemy.current].name;
+            showMessage(enemyName + ' attacks!');
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    state.player.health -= state.enemy.attackPower;
+                    document.querySelector('.pokemon.player').classList.add('shake');
+                    playSound('attack-sound');
+                    setTimeout(() => {
+                        document.querySelector('.pokemon.player').classList.remove('shake');
+                    }, 500);
+                    if (state.player.health <= 0) {
+                        state.player.health = 0;
+                        updateHealth();
+                        setTimeout(() => {
+                            showGameOver();
+                            disableButtons();
+                            resolve();
+                        }, 1000);
+                    } else {
+                        updateHealth();
+                        resolve();
+                    }
+                }, 2000);
+            });
+        }
+        async function attack(type) {
+            playSound('pokeball-sound');
+            const buttons = document.querySelectorAll('.attack-btn');
+            buttons.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.disabled = true;
+            });
+            let damage = 0;
+            let message = '';
+            switch (type) {
+                case 'discord':
+                    damage = 20;
+                    message = 'Edward used Discord Confusion!';
+                    break;
+                case 'ceo':
+                    state.enemy.attackPower = Math.max(5, state.enemy.attackPower - 5);
+                    message = 'Edward used CEO Ability!';
+                    break;
+                case 'king':
+                    damage = 40;
+                    state.player.health -= 5;
+                    message = 'Edward used For The King!';
+                    break;
+            }
+            showMessage(message);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            if (type !== 'ceo') {
+                playSound('attack-sound');
+                document.querySelector('.pokemon.enemy').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.pokemon.enemy').classList.remove('shake');
+                }, 500);
+            }
+            state.enemy.health -= damage;
+            if (state.enemy.health <= 0) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                showMessage(state.enemies[state.enemy.current].name + ' was defeated!');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                nextEnemy();
+            } else {
+                await enemyAttack();
+            }
+            updateHealth();
+            buttons.forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+                btn.disabled = false;
+            });
+        }
+        function nextEnemy() {
+            state.enemy.current++;
+            if (state.enemy.current >= state.enemies.length) {
+                showWinScreen();
+                disableButtons();
+                return;
+            }
+            document.querySelector('.pokemon.enemy').classList.remove('appear');
+            document.querySelector('.enemy-ball').classList.remove('pokeball-throw');
+            setTimeout(() => {
+                state.enemy.health = 100;
+                document.querySelector('.enemy img').src = state.enemies[state.enemy.current].img;
+                document.getElementById('enemy-name').textContent = state.enemies[state.enemy.current].name;
+                document.querySelector('.enemy-ball').classList.add('pokeball-throw');
+                playSound('pokeball-sound');
+                setTimeout(() => {
+                    document.querySelector('.pokemon.enemy').classList.add('appear');
+                    updateHealth();
+                    showMessage(state.enemies[state.enemy.current].name + ' appears!');
+                }, 1000);
+            }, 1000);
+        }
+        function disableButtons() {
+            const buttons = document.querySelectorAll('.attack-btn');
+            buttons.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.disabled = true;
+            });
+        }
+        function showGameOver() {
+            const gameOverScreen = document.querySelector('.game-over-screen');
+            gameOverScreen.style.display = 'flex';
+        }
+        function showWinScreen() {
+            const winScreen = document.querySelector('.win-screen');
+            winScreen.style.display = 'flex';
+        }
+        function handleStartScreen() {
+            const startScreen = document.querySelector('.start-screen');
+            startScreen.addEventListener('click', () => {
+                startScreen.style.display = 'none';
+                startIntro();
+            });
+            startScreen.addEventListener('touchstart', () => {
+                startScreen.style.display = 'none';
+                startIntro();
+            });
+        }
+        updateHealth();
+        handleStartScreen();
+    </script>
+</body>
+</html>
